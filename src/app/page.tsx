@@ -81,7 +81,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["carrot-note-1.png", "carrot-note-2.png", "carrot-note-3.png", "carrot-note-4.png"]
+    screenshotNames: ["carrot-note-2.png", "carrot-note-3.png", "carrot-note-4.png"]
   },
   {
     id: "proj-mobile-2",
@@ -91,7 +91,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["mlradiofm-rn-1.png", "mlradiofm-rn-2.png", "mlradiofm-rn-3.png", "mlradiofm-rn-4.png"],
+    screenshotNames: ["mlradiofm-rn-2.png", "mlradiofm-rn-3.png", "mlradiofm-rn-4.png"],
   },
   {
     id: "proj-mobile-3",
@@ -99,7 +99,7 @@ const projects: IProject[] = [
     description:
       "MlRadioFm is a macOS Swift app that streams Korean radio (KBS, MBC, SBS, etc.), some popular English music stations, and podcast stations with a modern, localized UI and an integrated audio player. It focuses on easy access to live stations, good listening controls, and a clean desktop experience.",
     techStack: ["Swift"],
-    category: "mobile",
+    category: "macos",
     note: "",
     screenshotNames: ["mlradiofm-1.png", "mlradiofm-2.png", "mlradiofm-3.png"],
   },
@@ -111,7 +111,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["puzzle-board-1.png", "puzzle-board-2.png", "puzzle-board-3.png", "puzzle-board-4.png"],
+    screenshotNames: ["puzzle-board-1.png", "puzzle-board-3.png", "puzzle-board-4.png"],
   },
   {
     id: "proj-mobile-5",
@@ -138,6 +138,9 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
   const webProjects = projects.filter((project) => project.category === "web");
+  const macosProjects = projects.filter(
+    (project) => project.category === "macos",
+  );
   const mobileProjects = projects.filter(
     (project) => project.category === "mobile",
   );
@@ -308,77 +311,147 @@ export default function Home() {
             Projects
           </h2>
 
-          {/* Web projects */}
-          <div className="mt-6 space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60">
-              Web
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {webProjects.map((project) => {
-                const primaryScreenshot = project.screenshotNames?.[0];
+          {/* Web & macOS projects */}
+          <div className="mt-6 grid gap-8 md:grid-cols-2">
+            {/* Web */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60">
+                Web
+              </h3>
+              <div className="grid gap-4">
+                {webProjects.map((project) => {
+                  const primaryScreenshot = project.screenshotNames?.[0];
 
-                return (
-                  <article
-                    key={project.id}
-                    className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm shadow-sm shadow-black/30 backdrop-blur-sm"
-                  >
-                    <div>
-                      <h3 className="text-sm font-semibold">
-                        {project.name}
-                      </h3>
-                      <p className="mt-2 text-xs leading-relaxed text-foreground/80">
-                        {project.description}
-                      </p>
-                      <div className="mt-3 flex items-center gap-3">
-                        {/* Desktop screenshot placeholder / image */}
-                        <div className="relative h-36 w-full max-w-xs rounded-xl border border-accent-soft/30 bg-accent-soft/10 shadow-inner shadow-black/40">
-                          <div className="absolute inset-x-4 top-2 flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                  return (
+                    <article
+                      key={project.id}
+                      className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm shadow-sm shadow-black/30 backdrop-blur-sm"
+                    >
+                      <div>
+                        <h3 className="text-sm font-semibold">
+                          {project.name}
+                        </h3>
+                        <p className="mt-2 text-xs leading-relaxed text-foreground/80">
+                          {project.description}
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {project.techStack.map((tech) => (
+                            <span
+                              key={tech}
+                              className="rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-[11px] text-foreground/80"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex items-center gap-3">
+                          {/* Desktop screenshot placeholder / image */}
+                          <div className="relative h-52 w-full max-w-xs rounded-xl border border-accent-soft/30 bg-accent-soft/10 shadow-inner shadow-black/40">
+                            <div className="absolute inset-x-4 top-2 flex items-center gap-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                              <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                              <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                            </div>
+                            <div className="absolute inset-x-3 bottom-2 top-5 overflow-hidden rounded-lg border border-white/15 bg-black/60">
+                              {primaryScreenshot ? (
+                                <Image
+                                  src={`/${primaryScreenshot}`}
+                                  alt={`${project.name} screenshot`}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center px-3 text-center">
+                                  <span className="text-[10px] text-foreground/70">
+                                    web-screenshot.png
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="absolute inset-x-3 bottom-2 top-5 overflow-hidden rounded-lg border border-white/15 bg-black/60">
-                            {primaryScreenshot ? (
-                              <Image
-                                src={`/${primaryScreenshot}`}
-                                alt={`${project.name} screenshot`}
-                                fill
-                                className="object-cover"
-                              />
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* macOS */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/60">
+                macOS
+              </h3>
+              <div className="grid gap-4">
+                {macosProjects.map((project) => {
+                  const hasScreenshots =
+                    project.screenshotNames && project.screenshotNames.length > 0;
+
+                  return (
+                    <article
+                      key={project.id}
+                      className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm shadow-sm shadow-black/30 backdrop-blur-sm"
+                    >
+                      <div>
+                        <h3 className="text-sm font-semibold">
+                          {project.name}
+                        </h3>
+                        <p className="mt-2 text-xs leading-relaxed text-foreground/80">
+                          {project.description}
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {project.techStack.map((tech) => (
+                            <span
+                              key={tech}
+                              className="rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-[11px] text-foreground/80"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-3">
+                          {/* Phone-style mockups for all screenshots or a single placeholder (same as mobile) */}
+                          <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:pb-2">
+                            {hasScreenshots ? (
+                              project.screenshotNames!.map(
+                                (screenshotName, index) => (
+                                  <div
+                                    key={screenshotName ?? index}
+                                    className="relative h-40 w-24 shrink-0 rounded-3xl border border-accent-soft/40 bg-accent-soft/20 shadow-inner shadow-black/50"
+                                  >
+                                    <div className="absolute inset-1 overflow-hidden rounded-2xl border border-white/20 bg-black/60">
+                                      <Image
+                                        src={`/${screenshotName}`}
+                                        alt={`${project.name} screenshot ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                    <div className="absolute inset-x-6 top-2 h-1.5 rounded-full bg-white/20" />
+                                    <div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
+                                  </div>
+                                ),
+                              )
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center px-3 text-center">
-                                <span className="text-[10px] text-foreground/70">
-                                  web-screenshot.png
-                                </span>
+                              <div className="relative h-40 w-24 shrink-0 rounded-3xl border border-accent-soft/40 bg-accent-soft/20 shadow-inner shadow-black/50">
+                                <div className="absolute inset-1 overflow-hidden rounded-2xl border border-white/20 bg-black/60">
+                                  <div className="flex h-full w-full items-center justify-center px-2 text-center">
+                                    <span className="text-[10px] text-foreground/70">
+                                      macos-screenshot.png
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="absolute inset-x-6 top-2 h-1.5 rounded-full bg-white/20" />
+                                <div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
                               </div>
                             )}
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {project.techStack.map((tech) => (
-                        <span
-                          key={tech}
-                          className="rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-[11px] text-foreground/80"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  {/* {project.href && (
-                    <a
-                      href={project.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex text-xs font-medium text-accent hover:text-accent-soft"
-                    >
-                      View project
-                    </a>
-                  )} */}
-                  </article>
-                );
-              })}
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

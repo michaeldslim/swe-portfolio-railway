@@ -14,7 +14,7 @@ export interface IExperience {
   techStack?: string[];
 }
 
-export type ProjectCategory = "web" | "mobile" | "other";
+export type ProjectCategory = "web" | "mobile" | "macos" | "other";
 
 export interface IProject {
   id: string;
