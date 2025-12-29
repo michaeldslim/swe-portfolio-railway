@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { IExperience, INavItem, IProject } from "@/types";
+
+type ThemeName = "dark-teal" | "dark-green" | "light-neutral";
 
 const navItems: INavItem[] = [
   { id: "home", label: "Home", href: "#home" },
@@ -128,6 +130,13 @@ const sectionClassName =
 
 export default function Home() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeName>("dark-green");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
   const webProjects = projects.filter((project) => project.category === "web");
   const mobileProjects = projects.filter(
     (project) => project.category === "mobile",
@@ -140,33 +149,51 @@ export default function Home() {
           <div className="text-sm font-mono uppercase tracking-[0.2em] text-accent">
             Michael Lim
           </div>
-          {/* Desktop navigation */}
-          <nav className="hidden gap-4 text-xs sm:flex sm:text-sm">
-            {navItems.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className="text-foreground/70 transition hover:text-accent"
+          <div className="flex items-center gap-3">
+            {/* Desktop navigation */}
+            <nav className="hidden gap-4 text-xs sm:flex sm:text-sm">
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  className="text-foreground/70 transition hover:text-accent"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+            <label className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[10px] text-foreground/70">
+              <span className="font-mono uppercase tracking-[0.16em]">
+                Theme
+              </span>
+              <select
+                value={theme}
+                onChange={(event) =>
+                  setTheme(event.target.value as ThemeName)
+                }
+                className="bg-transparent text-[10px] text-foreground/80 focus:outline-none"
               >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          {/* Mobile hamburger */}
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-black/20 px-2 py-1 text-xs text-foreground/80 shadow-sm shadow-black/30 sm:hidden"
-            onClick={() => setIsMobileNavOpen((open) => !open)}
-            aria-label="Toggle navigation menu"
-          >
-            <span className="mr-1 text-[10px] font-mono uppercase tracking-[0.2em]">
-              Menu
-            </span>
-            <span className="flex flex-col gap-0.5">
-              <span className="h-0.5 w-3 bg-current" />
-              <span className="h-0.5 w-3 bg-current" />
-            </span>
-          </button>
+                <option value="dark-teal">Dark teal</option>
+                <option value="dark-green">Dark green</option>
+                <option value="light-neutral">Light</option>
+              </select>
+            </label>
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-md border border-white/10 bg-black/20 px-2 py-1 text-xs text-foreground/80 shadow-sm shadow-black/30 sm:hidden"
+              onClick={() => setIsMobileNavOpen((open) => !open)}
+              aria-label="Toggle navigation menu"
+            >
+              <span className="mr-1 text-[10px] font-mono uppercase tracking-[0.2em]">
+                Menu
+              </span>
+              <span className="flex flex-col gap-0.5">
+                <span className="h-0.5 w-3 bg-current" />
+                <span className="h-0.5 w-3 bg-current" />
+              </span>
+            </button>
+          </div>
         </div>
         {isMobileNavOpen && (
           <nav className="border-t border-white/10 bg-background/95 px-6 py-3 sm:hidden">
@@ -475,8 +502,8 @@ export default function Home() {
 
             <div className="md:w-1/3">
               <div className="mt-8 flex justify-center md:mt-0">
-                <div className="rounded-3xl border border-white/15 bg-background/60 p-1.5 shadow-lg shadow-black/40">
-                  <div className="relative h-44 w-44 overflow-hidden rounded-2xl border border-white/20 bg-white/5">
+                <div className="rounded-3xl border border-accent-soft/40 bg-background/60 p-1.5 shadow-lg shadow-black/40">
+                  <div className="relative h-44 w-44 overflow-hidden rounded-2xl border border-accent-soft/60 bg-white/5">
                     <Image
                       src="/michael.jpg"
                       alt="Portrait of Michael Lim"
