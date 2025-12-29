@@ -91,7 +91,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["mlradiofm-rn.png"],
+    screenshotNames: ["mlradiofm-rn-1.png", "mlradiofm-rn-2.png", "mlradiofm-rn-3.png", "mlradiofm-rn-4.png"],
   },
   {
     id: "proj-mobile-3",
@@ -101,7 +101,7 @@ const projects: IProject[] = [
     techStack: ["Swift"],
     category: "mobile",
     note: "",
-    screenshotNames: ["mlradiofm-mac.png"],
+    screenshotNames: ["mlradiofm-1.png", "mlradiofm-2.png", "mlradiofm-3.png"],
   },
   {
     id: "proj-mobile-4",
@@ -111,7 +111,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["puzzle-board.png"],
+    screenshotNames: ["puzzle-board-1.png", "puzzle-board-2.png", "puzzle-board-3.png", "puzzle-board-4.png"],
   },
   {
     id: "proj-mobile-5",
@@ -121,7 +121,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["omok-game.png"],
+    screenshotNames: ["omok-game-1.png", "omok-game-2.png", "omok-game-3.png"],
   },
 ];
 
