@@ -75,7 +75,7 @@ const projects: IProject[] = [
   },
   {
     id: "proj-mobile-1",
-    name: "Carrot Note app",
+    name: "Carrot Note App",
     description:
       "Carrot Note App is a React Native note‑taking app that lets users sign up/login with Firebase Auth, create and manage titled notes stored in Firestore, and organize them into custom categories. It includes a note list and detail editor, category management in Settings, and email verification to keep user data tied securely to their account.",
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
