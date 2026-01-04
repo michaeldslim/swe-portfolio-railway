@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import type { IExperience, INavItem, IProject } from "@/types";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import type { IExperience, INavItem, IProject, IStoredTheme, ThemeName } from "@/types";
 
-type ThemeName = "dark-teal" | "dark-green" | "light-neutral";
+const LOCAL_THEME = "local-theme-name";
+const THEME_TTL_MS = 24 * 60 * 60 * 1000;
+const THEME_CHANGE_EVENT = "local-theme-change";
 
 const navItems: INavItem[] = [
   { id: "home", label: "Home", href: "#home" },
@@ -81,7 +83,7 @@ const projects: IProject[] = [
     techStack: ["React Native", "TypeScript", "Android", "iOS"],
     category: "mobile",
     note: "",
-    screenshotNames: ["carrot-note-2.png", "carrot-note-3.png", "carrot-note-4.png"]
+    screenshotNames: ["carrot-note-2.png", "carrot-note-3.png", "carrot-note-4.png"],
   },
   {
     id: "proj-mobile-2",
@@ -125,25 +127,71 @@ const projects: IProject[] = [
   },
 ];
 
-const sectionClassName =
-  "scroll-mt-24 py-16 sm:py-20 border-t border-white/5 first:border-t-0";
+const sectionClassName = "scroll-mt-24 py-16 sm:py-20 border-t border-white/5 first:border-t-0";
 
 export default function Home() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [theme, setTheme] = useState<ThemeName>("dark-green");
+  const theme = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") return () => undefined;
 
-  useEffect(() => {
+      const onStorage = (event: StorageEvent) => {
+        if (event.key === LOCAL_THEME) onStoreChange();
+      };
+
+      const onThemeChange = () => onStoreChange();
+
+      window.addEventListener("storage", onStorage);
+      window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
+
+      return () => {
+        window.removeEventListener("storage", onStorage);
+        window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
+      };
+    },
+    () => {
+      const fallback: ThemeName = "dark-green";
+      if (typeof window === "undefined") return fallback;
+
+      const stored = window.localStorage.getItem(LOCAL_THEME);
+      if (!stored) return fallback;
+
+      try {
+        const parsed: IStoredTheme = JSON.parse(stored) as IStoredTheme;
+        const isExpired = typeof parsed?.expiresAt !== "number" || parsed.expiresAt <= Date.now();
+
+        if (isExpired) {
+          window.localStorage.removeItem(LOCAL_THEME);
+          return fallback;
+        }
+
+        return parsed?.value ?? fallback;
+      } catch {
+        window.localStorage.removeItem(LOCAL_THEME);
+        return fallback;
+      }
+    },
+    () => "dark-green",
+  );
+
+  const setTheme = (nextTheme: ThemeName) => {
     if (typeof window === "undefined") return;
 
+    const payload: IStoredTheme = {
+      value: nextTheme,
+      expiresAt: Date.now() + THEME_TTL_MS,
+    };
+
+    window.localStorage.setItem(LOCAL_THEME, JSON.stringify(payload));
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+  };
+
+  useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
   const webProjects = projects.filter((project) => project.category === "web");
-  const macosProjects = projects.filter(
-    (project) => project.category === "macos",
-  );
-  const mobileProjects = projects.filter(
-    (project) => project.category === "mobile",
-  );
+  const macosProjects = projects.filter((project) => project.category === "macos");
+  const mobileProjects = projects.filter((project) => project.category === "mobile");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -166,14 +214,10 @@ export default function Home() {
               ))}
             </nav>
             <label className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[10px] text-foreground/70">
-              <span className="font-mono uppercase tracking-[0.16em]">
-                Theme
-              </span>
+              <span className="font-mono uppercase tracking-[0.16em]">Theme</span>
               <select
                 value={theme}
-                onChange={(event) =>
-                  setTheme(event.target.value as ThemeName)
-                }
+                onChange={(event) => setTheme(event.target.value as ThemeName)}
                 className="bg-transparent text-[10px] text-foreground/80 focus:outline-none"
               >
                 <option value="dark-teal">Dark teal</option>
@@ -188,9 +232,7 @@ export default function Home() {
               onClick={() => setIsMobileNavOpen((open) => !open)}
               aria-label="Toggle navigation menu"
             >
-              <span className="mr-1 text-[10px] font-mono uppercase tracking-[0.2em]">
-                Menu
-              </span>
+              <span className="mr-1 text-[10px] font-mono uppercase tracking-[0.2em]">Menu</span>
               <span className="flex flex-col gap-0.5">
                 <span className="h-0.5 w-3 bg-current" />
                 <span className="h-0.5 w-3 bg-current" />
@@ -227,7 +269,13 @@ export default function Home() {
               I build clear, performant web and mobile experiences.
             </h1>
             <p className="mt-4 text-sm leading-relaxed text-foreground/70 sm:text-base">
-              Senior Frontend Engineer with 10+ years of experience building scalable, accessible web applications with React, TypeScript, and modern JavaScript. Led the development of a shared React design system compliant with WCAG 2.1 AA,improving delivery efficiency by 20% and supporting 1M+ users. Strong focus on front-end architecture, performance optimization, and design systems, collaborating closely with UX, product, and backend teams and integrating CI/CD pipelines to ship reliable, high-quality features in remote, cross-functional environments.
+              Senior Frontend Engineer with 10+ years of experience building scalable, accessible
+              web applications with React, TypeScript, and modern JavaScript. Led the development of
+              a shared React design system compliant with WCAG 2.1 AA,improving delivery efficiency
+              by 20% and supporting 1M+ users. Strong focus on front-end architecture, performance
+              optimization, and design systems, collaborating closely with UX, product, and backend
+              teams and integrating CI/CD pipelines to ship reliable, high-quality features in
+              remote, cross-functional environments.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 sm:justify-start">
               <a
@@ -248,24 +296,32 @@ export default function Home() {
 
         {/* About */}
         <section id="about" className={sectionClassName}>
-          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">
-            About
-          </h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">About</h2>
           <div className="mt-4 space-y-4 text-sm leading-relaxed text-foreground/80 sm:text-base">
             <p>
-              I hold a master&apos;s degree in Engineering Technology and a bachelor&apos;s degree in Computer Science. With over 10 years of experience in web development, I have built a strong foundation in designing and developing dynamic, scalable web and mobile applications using React, React Native, TypeScript, and modern JavaScript tools. My passion for crafting intuitive user experiences, along with my ability to collaborate effectively across cross-functional teams, makes me a strong fit for this role.
+              I hold a master&apos;s degree in Engineering Technology and a bachelor&apos;s degree
+              in Computer Science. With over 10 years of experience in web development, I have built
+              a strong foundation in designing and developing dynamic, scalable web and mobile
+              applications using React, React Native, TypeScript, and modern JavaScript tools. My
+              passion for crafting intuitive user experiences, along with my ability to collaborate
+              effectively across cross-functional teams, makes me a strong fit for this role.
             </p>
             <p>
-              I served as a Technical Consultant at Northwell Health, where I provided specialized front-end development expertise and partnered closely with internal teams to drive digital transformation initiatives. I played a key role in implementing GCP Vertex AI features on the Google Cloud Platform, enhancing user search experiences, and contributed to the MyNorthwell application, ensuring seamless accessibility across web and mobile platforms. My experience with database management, including MSSQL, PostgreSQL, and Sequelize migrations, has further enabled me to optimize data handling and performance.
+              I served as a Technical Consultant at Northwell Health, where I provided specialized
+              front-end development expertise and partnered closely with internal teams to drive
+              digital transformation initiatives. I played a key role in implementing GCP Vertex AI
+              features on the Google Cloud Platform, enhancing user search experiences, and
+              contributed to the MyNorthwell application, ensuring seamless accessibility across web
+              and mobile platforms. My experience with database management, including MSSQL,
+              PostgreSQL, and Sequelize migrations, has further enabled me to optimize data handling
+              and performance.
             </p>
           </div>
         </section>
 
         {/* Experience */}
         <section id="experience" className={sectionClassName}>
-          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">
-            Experience
-          </h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">Experience</h2>
           <div className="mt-6 space-y-4">
             {experiences.map((experience) => (
               <article
@@ -274,16 +330,10 @@ export default function Home() {
               >
                 <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-baseline">
                   <div>
-                    <h3 className="text-sm font-semibold sm:text-base">
-                      {experience.role}
-                    </h3>
-                    <p className="text-xs text-foreground/60 sm:text-sm">
-                      {experience.company}
-                    </p>
+                    <h3 className="text-sm font-semibold sm:text-base">{experience.role}</h3>
+                    <p className="text-xs text-foreground/60 sm:text-sm">{experience.company}</p>
                   </div>
-                  <p className="text-xs text-foreground/50 sm:text-xs">
-                    {experience.period}
-                  </p>
+                  <p className="text-xs text-foreground/50 sm:text-xs">{experience.period}</p>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-foreground/80 sm:text-sm">
                   {experience.description}
@@ -307,9 +357,7 @@ export default function Home() {
 
         {/* Projects */}
         <section id="projects" className={sectionClassName}>
-          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">
-            Projects
-          </h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">Projects</h2>
 
           {/* Web & macOS projects */}
           <div className="mt-6 grid gap-8 md:grid-cols-2">
@@ -328,9 +376,7 @@ export default function Home() {
                       className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm shadow-sm shadow-black/30 backdrop-blur-sm"
                     >
                       <div>
-                        <h3 className="text-sm font-semibold">
-                          {project.name}
-                        </h3>
+                        <h3 className="text-sm font-semibold">{project.name}</h3>
                         <p className="mt-2 text-xs leading-relaxed text-foreground/80">
                           {project.description}
                         </p>
@@ -393,9 +439,7 @@ export default function Home() {
                       className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm shadow-sm shadow-black/30 backdrop-blur-sm"
                     >
                       <div>
-                        <h3 className="text-sm font-semibold">
-                          {project.name}
-                        </h3>
+                        <h3 className="text-sm font-semibold">{project.name}</h3>
                         <p className="mt-2 text-xs leading-relaxed text-foreground/80">
                           {project.description}
                         </p>
@@ -413,25 +457,23 @@ export default function Home() {
                           {/* Phone-style mockups for all screenshots or a single placeholder (same as mobile) */}
                           <div className="grid grid-cols-2 gap-3 sm:flex sm:overflow-x-auto sm:pb-2">
                             {hasScreenshots ? (
-                              project.screenshotNames!.map(
-                                (screenshotName, index) => (
-                                  <div
-                                    key={screenshotName ?? index}
-                                    className="relative h-40 w-24 shrink-0 rounded-3xl border border-accent-soft/40 bg-accent-soft/20 shadow-inner shadow-black/50"
-                                  >
-                                    <div className="absolute inset-1 overflow-hidden rounded-2xl border border-white/20 bg-black/60">
-                                      <Image
-                                        src={`/${screenshotName}`}
-                                        alt={`${project.name} screenshot ${index + 1}`}
-                                        fill
-                                        className="object-cover"
-                                      />
-                                    </div>
-                                    <div className="absolute inset-x-6 top-2 h-1.5 rounded-full bg-white/20" />
-                                    <div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
+                              project.screenshotNames!.map((screenshotName, index) => (
+                                <div
+                                  key={screenshotName ?? index}
+                                  className="relative h-40 w-24 shrink-0 rounded-3xl border border-accent-soft/40 bg-accent-soft/20 shadow-inner shadow-black/50"
+                                >
+                                  <div className="absolute inset-1 overflow-hidden rounded-2xl border border-white/20 bg-black/60">
+                                    <Image
+                                      src={`/${screenshotName}`}
+                                      alt={`${project.name} screenshot ${index + 1}`}
+                                      fill
+                                      className="object-cover"
+                                    />
                                   </div>
-                                ),
-                              )
+                                  <div className="absolute inset-x-6 top-2 h-1.5 rounded-full bg-white/20" />
+                                  <div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
+                                </div>
+                              ))
                             ) : (
                               <div className="relative h-40 w-24 shrink-0 rounded-3xl border border-accent-soft/40 bg-accent-soft/20 shadow-inner shadow-black/50">
                                 <div className="absolute inset-1 overflow-hidden rounded-2xl border border-white/20 bg-black/60">
@@ -472,9 +514,7 @@ export default function Home() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-sm font-semibold">
-                          {project.name}
-                        </h3>
+                        <h3 className="text-sm font-semibold">{project.name}</h3>
                         <p className="mt-1 text-xs leading-relaxed text-foreground/80">
                           {project.description}
                         </p>
@@ -540,12 +580,11 @@ export default function Home() {
         <section id="contact" className={sectionClassName}>
           <div className="flex flex-col gap-8 md:flex-row md:items-center">
             <div className="md:w-2/3">
-              <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">
-                Contact
-              </h2>
+              <h2 className="text-sm font-mono uppercase tracking-[0.25em] text-accent">Contact</h2>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground/80 sm:text-base">
-                I am always open to discussing frontend architecture,
-                React and React Native projects, or mentoring opportunities. I am available on social medias provided below. You can message me, I will reply as soon as possible.
+                I am always open to discussing frontend architecture, React and React Native
+                projects, or mentoring opportunities. I am available on social medias provided
+                below. You can message me, I will reply as soon as possible.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm sm:justify-start">
                 <a

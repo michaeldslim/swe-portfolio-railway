@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+import type { ThemeName } from "@/types";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,8 +14,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-type ThemeName = "dark-teal" | "dark-green" | "light-neutral";
 
 const THEME_NAME: ThemeName = "dark-green";
 
@@ -28,7 +29,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme={THEME_NAME}>
+    <html lang="en" data-theme={THEME_NAME} suppressHydrationWarning>
+      <head>
+        <Script id="local-theme-init" strategy="beforeInteractive">{`(() => {
+  try {
+    const key = "local-theme-name";
+    const stored = window.localStorage.getItem(key);
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+    const expiresAt = parsed?.expiresAt;
+    const value = parsed?.value;
+
+    if (typeof expiresAt !== "number" || expiresAt <= Date.now()) {
+      window.localStorage.removeItem(key);
+      return;
+    }
+
+    if (typeof value === "string") {
+      document.documentElement.setAttribute("data-theme", value);
+    }
+  } catch {
+    // no-op
+  }
+})();`}</Script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >

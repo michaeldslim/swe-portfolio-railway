@@ -26,3 +26,10 @@ export interface IProject {
   note?: string;
   screenshotNames?: string[];
 }
+
+export type ThemeName = "dark-teal" | "dark-green" | "light-neutral";
+
+export interface IStoredTheme {
+  value: ThemeName;
+  expiresAt: number;
+}
