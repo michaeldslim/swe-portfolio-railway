@@ -71,7 +71,7 @@ const projects: IProject[] = [
     description:
       "A small browser game built in JavaScript where you try to save every carrot from the bugs.",
     techStack: ["JavaScript", "HTML5", "CSS"],
-    href: "", // enable gmae using "game/"
+    href: "", // enable game using "game/"
     category: "web",
     screenshotNames: ["javascript-game.png"],
   },
