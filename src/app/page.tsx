@@ -71,7 +71,7 @@ const projects: IProject[] = [
     description:
       "A small browser game built in JavaScript where you try to save every carrot from the bugs.",
     techStack: ["JavaScript", "HTML5", "CSS"],
-    href: "https://michaeldslim.netlify.app/game/",
+    href: "", // enable gmae using "game/"
     category: "web",
     screenshotNames: ["javascript-game.png"],
   },
@@ -400,12 +400,23 @@ export default function Home() {
                             </div>
                             <div className="absolute inset-x-3 bottom-2 top-5 overflow-hidden rounded-lg border border-white/15 bg-black/60">
                               {primaryScreenshot ? (
-                                <Image
-                                  src={`/${primaryScreenshot}`}
-                                  alt={`${project.name} screenshot`}
-                                  fill
-                                  className="object-cover"
-                                />
+                                project.href ? (
+                                  <a href={project.href}>
+                                    <Image
+                                      src={`/${primaryScreenshot}`}
+                                      alt={`${project.name} screenshot`}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </a>
+                                ) : (
+                                  <Image
+                                    src={`/${primaryScreenshot}`}
+                                    alt={`${project.name} screenshot`}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                )
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center px-3 text-center">
                                   <span className="text-[10px] text-foreground/70">
