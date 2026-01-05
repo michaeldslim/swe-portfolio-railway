@@ -28,8 +28,3 @@ export interface IProject {
 }
 
 export type ThemeName = "dark-teal" | "dark-green" | "light-neutral";
-
-export interface IStoredTheme {
-  value: ThemeName;
-  expiresAt: number;
-}

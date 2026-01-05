@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import type { IExperience, INavItem, IProject, IStoredTheme, ThemeName } from "@/types";
+import { useState } from "react";
+import type { IExperience, INavItem, IProject, ThemeName } from "@/types";
+import { useTheme } from "./ThemeProvider";
 
-const LOCAL_THEME = "local-theme-name";
-const THEME_TTL_MS = 24 * 60 * 60 * 1000;
-const THEME_CHANGE_EVENT = "local-theme-change";
+const enableThemeSwitcher =
+  process.env.NEXT_PUBLIC_ENABLE_THEME_SWITCHER === "true";
 
 const navItems: INavItem[] = [
   { id: "home", label: "Home", href: "#home" },
@@ -131,64 +131,7 @@ const sectionClassName = "scroll-mt-24 py-16 sm:py-20 border-t border-white/5 fi
 
 export default function Home() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const theme = useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") return () => undefined;
-
-      const onStorage = (event: StorageEvent) => {
-        if (event.key === LOCAL_THEME) onStoreChange();
-      };
-
-      const onThemeChange = () => onStoreChange();
-
-      window.addEventListener("storage", onStorage);
-      window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
-
-      return () => {
-        window.removeEventListener("storage", onStorage);
-        window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
-      };
-    },
-    () => {
-      const fallback: ThemeName = "dark-green";
-      if (typeof window === "undefined") return fallback;
-
-      const stored = window.localStorage.getItem(LOCAL_THEME);
-      if (!stored) return fallback;
-
-      try {
-        const parsed: IStoredTheme = JSON.parse(stored) as IStoredTheme;
-        const isExpired = typeof parsed?.expiresAt !== "number" || parsed.expiresAt <= Date.now();
-
-        if (isExpired) {
-          window.localStorage.removeItem(LOCAL_THEME);
-          return fallback;
-        }
-
-        return parsed?.value ?? fallback;
-      } catch {
-        window.localStorage.removeItem(LOCAL_THEME);
-        return fallback;
-      }
-    },
-    () => "dark-green",
-  );
-
-  const setTheme = (nextTheme: ThemeName) => {
-    if (typeof window === "undefined") return;
-
-    const payload: IStoredTheme = {
-      value: nextTheme,
-      expiresAt: Date.now() + THEME_TTL_MS,
-    };
-
-    window.localStorage.setItem(LOCAL_THEME, JSON.stringify(payload));
-    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
-  };
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+  const { theme, handleThemeChange } = useTheme();
   const webProjects = projects.filter((project) => project.category === "web");
   const macosProjects = projects.filter((project) => project.category === "macos");
   const mobileProjects = projects.filter((project) => project.category === "mobile");
@@ -213,18 +156,20 @@ export default function Home() {
                 </a>
               ))}
             </nav>
-            <label className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[10px] text-foreground/70">
-              <span className="font-mono uppercase tracking-[0.16em]">Theme</span>
-              <select
-                value={theme}
-                onChange={(event) => setTheme(event.target.value as ThemeName)}
-                className="bg-transparent text-[10px] text-foreground/80 focus:outline-none"
-              >
-                <option value="dark-teal">Dark teal</option>
-                <option value="dark-green">Dark green</option>
-                <option value="light-neutral">Light</option>
-              </select>
-            </label>
+            {enableThemeSwitcher && (
+              <label className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[10px] text-foreground/70">
+                <span className="font-mono uppercase tracking-[0.16em]">Theme</span>
+                <select
+                  value={theme}
+                  onChange={(event) => handleThemeChange(event.target.value as ThemeName)}
+                  className="bg-transparent text-[10px] text-foreground/80 focus:outline-none"
+                >
+                  <option value="dark-teal">Dark teal</option>
+                  <option value="dark-green">Dark green</option>
+                  <option value="light-neutral">Light</option>
+                </select>
+              </label>
+            )}
             {/* Mobile hamburger */}
             <button
               type="button"

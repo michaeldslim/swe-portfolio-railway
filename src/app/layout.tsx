@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 import type { ThemeName } from "@/types";
+import { getThemeForRequest } from "../server/theme";
+import { ThemeProvider } from "./ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,49 +16,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const THEME_NAME: ThemeName = "dark-green";
-
 export const metadata: Metadata = {
   title: "Michael Lim | Senior Frontend Engineer",
   description:
     "Portfolio of Michael Lim, a senior frontend engineer specializing in React, React Native, and TypeScript.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme: ThemeName = await getThemeForRequest();
+
   return (
-    <html lang="en" data-theme={THEME_NAME} suppressHydrationWarning>
-      <head>
-        <Script id="local-theme-init" strategy="beforeInteractive">{`(() => {
-  try {
-    const key = "local-theme-name";
-    const stored = window.localStorage.getItem(key);
-    if (!stored) return;
-
-    const parsed = JSON.parse(stored);
-    const expiresAt = parsed?.expiresAt;
-    const value = parsed?.value;
-
-    if (typeof expiresAt !== "number" || expiresAt <= Date.now()) {
-      window.localStorage.removeItem(key);
-      return;
-    }
-
-    if (typeof value === "string") {
-      document.documentElement.setAttribute("data-theme", value);
-    }
-  } catch {
-    // no-op
-  }
-})();`}</Script>
-      </head>
+    <html lang="en" data-theme={theme} suppressHydrationWarning>
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
+        <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
       </body>
     </html>
   );
