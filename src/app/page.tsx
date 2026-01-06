@@ -19,7 +19,7 @@ const navItems: INavItem[] = [
 const experiences: IExperience[] = [
   {
     id: "exp-1",
-    role: "Senior Frontend Engineer",
+    role: "Senior Frontend Engineer - Front End with Full Stack Experience",
     company: "Northwell Health",
     period: "",
     description:
@@ -46,7 +46,7 @@ const experiences: IExperience[] = [
   },
   {
     id: "exp-4",
-    role: "Senior Frontend Engineer",
+    role: "Senior Frontend Engineer - Front End with Full Stack Experience",
     company: "Paciolan",
     period: "",
     description:
