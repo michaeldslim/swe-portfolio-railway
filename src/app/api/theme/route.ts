@@ -23,18 +23,22 @@ export async function POST(request: Request) {
 
 		const cookieStore = await cookies();
 		let anonId = cookieStore.get(THEME_COOKIE_NAME)?.value;
-		let isNewAnon = false;
 		if (!anonId) {
 			anonId = crypto.randomUUID();
-			isNewAnon = true;
 		}
 
-		await supabaseServerClient
+		// Use non-null assertion since we already checked above.
+		const client = supabaseServerClient!;
+		const { error } = await client
 			.from("theme_preferences")
 			.upsert({ anon_id: anonId, theme }, { onConflict: "anon_id" });
+		if (error) {
+			console.error("Supabase theme upsert error", error);
+		}
 
 		const response = new NextResponse(null, { status: 204 });
-		if (isNewAnon && anonId) {
+		// Always (re)set the cookie so anon_id is consistent.
+		if (anonId) {
 			response.cookies.set(THEME_COOKIE_NAME, anonId, {
 				path: "/",
 				maxAge: 60 * 60 * 24 * 365,
