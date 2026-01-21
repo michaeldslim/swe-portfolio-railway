@@ -6,6 +6,8 @@ import type { ThemeName } from "@/types";
 import { getThemeForRequest } from "../server/theme";
 import { ThemeProvider } from "./ThemeProvider";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
