@@ -1,8 +1,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Ensure the theme switcher is enabled in the production bundle
-ENV NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true
+# Build-time flag to control the theme switcher in the client bundle
+ARG NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true
+ENV NEXT_PUBLIC_ENABLE_THEME_SWITCHER=${NEXT_PUBLIC_ENABLE_THEME_SWITCHER}
 
 # Install dependencies
 COPY package*.json ./

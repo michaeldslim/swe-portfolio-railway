@@ -15,7 +15,6 @@ export async function getThemeForRequest(): Promise<ThemeName> {
   const anonId = cookieStore.get(THEME_COOKIE_NAME)?.value;
 
   if (!anonId) {
-    console.log("[theme] No anon_id cookie found, using default theme");
     return DEFAULT_THEME;
   }
 
@@ -26,11 +25,6 @@ export async function getThemeForRequest(): Promise<ThemeName> {
     .maybeSingle();
 
   if (error || !data?.theme) {
-    console.log("[theme] Supabase theme fetch fallback", {
-      anonId,
-      error,
-      data,
-    });
     return DEFAULT_THEME;
   }
 
@@ -39,13 +33,8 @@ export async function getThemeForRequest(): Promise<ThemeName> {
     data.theme === "dark-green" ||
     data.theme === "light-neutral"
   ) {
-    console.log("[theme] Using theme from Supabase", { anonId, theme: data.theme });
     return data.theme;
   }
 
-  console.log("[theme] Invalid theme value in Supabase, using default", {
-    anonId,
-    theme: data.theme,
-  });
   return DEFAULT_THEME;
 }

@@ -35,6 +35,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true
 
       - name: Install Railway CLI
         run: npm i -g @railway/cli
