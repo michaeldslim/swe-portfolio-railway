@@ -1,6 +1,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Ensure the theme switcher is enabled in the production bundle
+ENV NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true
+
 # Install dependencies
 COPY package*.json ./
 RUN npm ci
