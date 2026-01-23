@@ -139,3 +139,86 @@ Result:
 
 - **Local:** use Supabase env vars + `NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true` → full theme switcher + persistence.
 - **Netlify:** don’t configure those env vars → no switcher, theme locked at `"dark-green"` and no DB usage.
+
+### Docker image (local & GHCR)
+
+#### Local build & run
+
+Build the image locally from the project root (where the `Dockerfile` lives):
+
+```bash
+docker build \
+  -t swe-portfolio-railway:local \
+  --build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true \
+  .
+```
+
+You can change the build arg as needed:
+
+```bash
+--build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=false
+```
+
+Run the container locally:
+
+```bash
+docker run --rm -p 3000:3000 swe-portfolio-railway:local
+```
+
+Then open:
+
+- http://localhost:3000
+
+#### GHCR build, push & run
+
+Assuming the image will be stored under a GitHub user or org account as:
+
+- `ghcr.io/{GitHub Username}/swe-portfolio-railway:latest`
+
+Login to GitHub Container Registry (requires a GitHub token with `read:packages` and `write:packages`):
+
+```bash
+echo "$GHCR_PAT" | docker login ghcr.io -u {GitHub Username} --password-stdin
+```
+
+Build and tag the image for GHCR:
+
+```bash
+docker build \
+  -t ghcr.io/{GitHub Username}/swe-portfolio-railway:latest \
+  --build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true \
+  .
+```
+
+Push the image to GHCR:
+
+```bash
+docker push ghcr.io/{GitHub Username}/swe-portfolio-railway:latest
+```
+
+Run the image from GHCR (on any machine with Docker):
+
+```bash
+docker run --rm -p 3000:3000 ghcr.io/{GitHub Username}/swe-portfolio-railway:latest
+```
+
+Summary:
+- Local: 
+```bash
+docker build -t swe-portfolio-railway:local --build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true .
+```
+```bash
+docker run --rm -p 3000:3000 swe-portfolio-railway:local
+```
+
+- GHCR: You’re logged in to GHCR if the image is private: 
+```bash
+echo "$GHCR_PAT" | docker login ghcr.io -u {GitHub Username} --password-stdin
+```
+```bash
+docker build -t ghcr.io/{GitHub Username}/swe-portfolio-railway:latest --build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true .
+```
+```bash
+docker pull ghcr.io/{GitHub Username}/swe-portfolio-railway:latest
+docker run --rm -p 3000:3000 ghcr.io/{GitHub Username}/swe-portfolio-railway:latest
+```
