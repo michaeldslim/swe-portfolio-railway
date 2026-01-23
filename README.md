@@ -178,7 +178,7 @@ Assuming the image will be stored under a GitHub user or org account as:
 Login to GitHub Container Registry (requires a GitHub token with `read:packages` and `write:packages`):
 
 ```bash
-echo "$GHCR_PAT" | docker login ghcr.io -u {GitHub Username} --password-stdin
+docker login --username {GitHub Username} --password <github personal token classic> ghcr.io
 ```
 
 Build and tag the image for GHCR:
@@ -213,7 +213,7 @@ docker run --rm -p 3000:3000 swe-portfolio-railway:local
 
 - GHCR: You’re logged in to GHCR if the image is private: 
 ```bash
-echo "$GHCR_PAT" | docker login ghcr.io -u {GitHub Username} --password-stdin
+docker login --username {GitHub Username} --password <github personal token classic> ghcr.io
 ```
 ```bash
 docker build -t ghcr.io/{GitHub Username}/swe-portfolio-railway:latest --build-arg NEXT_PUBLIC_ENABLE_THEME_SWITCHER=true .
